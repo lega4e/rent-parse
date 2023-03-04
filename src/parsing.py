@@ -1,5 +1,3 @@
-import traceback
-
 import src.translate as tr
 
 from bs4 import BeautifulSoup, Tag
@@ -7,8 +5,7 @@ from copy import deepcopy
 from typing import Optional
 
 from src.place import *
-
-_print_trackeback_ornone = False
+from src.utils import orn
 
 
 class TagValue:
@@ -107,9 +104,9 @@ def get_floor(soup: BeautifulSoup) -> Floor:
 
 def metres_from_params(params: {str: str}) -> Metres:
   return Metres(
-    total=orn(tr.floating, params['Общая площадь']),
-    habitable=orn(tr.floating, params['Жилая площадь']),
-    kitchen=orn(tr.floating, params['Площадь кухни']),
+    total=orn(tr.floating, params.get('Общая площадь')),
+    habitable=orn(tr.floating, params.get('Жилая площадь')),
+    kitchen=orn(tr.floating, params.get('Площадь кухни')),
   )
 
 
@@ -123,12 +120,3 @@ def remove_metres_params(params: {str: str}) -> {str: str}:
 
 def data_tags(soup: BeautifulSoup, value: str) -> [Tag]:
   return list(soup.find_all(TagValue('data-name', value)))
-
-
-def orn(func, *args, **kwargs):
-  try:
-    return func(*args, **kwargs)
-  except:
-    if _print_trackeback_ornone:
-      print(traceback.format_exc())
-    return None

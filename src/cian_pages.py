@@ -6,9 +6,9 @@ from typing import Optional
 from bs4 import BeautifulSoup
 from cloudscraper import create_scraper
 
-from src.parsing import parse_place, orn
+from src.parsing import parse_place
 from src.place import CianPlace
-
+from src.utils import orn
 
 _dir = 'cian_pages'
 

@@ -9,7 +9,7 @@ class Underground:
 
   def __str__(self):
     return (f'<Underground name: {self.name}, '
-        + f'minutes: {self.minutes}>')
+            + f'minutes: {self.minutes}>')
 
   def __repr__(self):
     return self.__str__()
@@ -28,8 +28,8 @@ class Metres:
 
   def __str__(self):
     return (f'<Metres total: {self.total}, '
-        + f'kitchen: {self.kitchen}, '
-        + f'habitable: {self.habitable}>')
+            + f'kitchen: {self.kitchen}, '
+            + f'habitable: {self.habitable}>')
 
   def __repr__(self):
     return self.__str__()
@@ -48,8 +48,8 @@ class Price:
 
   def __str__(self):
     return (f'<Price rent: {self.rent}, '
-        + f'commission: {self.commission}, '
-        + f'deposit: {self.deposit}>')
+            + f'commission: {self.commission}, '
+            + f'deposit: {self.deposit}>')
 
   def __repr__(self):
     return self.__str__()
@@ -66,7 +66,7 @@ class Floor:
 
   def __str__(self):
     return (f'<Floor total: {self.total}, '
-        + f'current: {self.current}>')
+            + f'current: {self.current}>')
 
   def __repr__(self):
     return self.__str__()
@@ -97,14 +97,14 @@ class CianPlace:
 
   def __str__(self):
     return (f'<CianPlace\n'
-        + f'  price:     {self.price},\n'
-        + f'  rooms:     {self.rooms},\n'
-        + f'  addr:    {self.addr},\n'
-        + f'  metres:    {self.metres},\n'
-        + f'  under:     {self.under},\n'
-        + f'  floor:     {self.floor},\n'
-        + f'  params:    {self.params},\n'
-        + f'  items:     {self.items}>')
+            + f'  price:  {self.price},\n'
+            + f'  rooms:  {self.rooms},\n'
+            + f'  addr:   {self.addr},\n'
+            + f'  metres: {self.metres},\n'
+            + f'  under:  {self.under},\n'
+            + f'  floor:  {self.floor},\n'
+            + f'  params: {self.params},\n'
+            + f'  items:  {self.items}>')
 
   def __repr__(self):
     return self.__str__()
