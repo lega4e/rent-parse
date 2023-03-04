@@ -1,0 +1,6 @@
+*.bin
+.*
+venv
+*.html
+cian_pages
+__pycache__
