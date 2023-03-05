@@ -1,129 +1,92 @@
 #!python3
-
+import argparse
 import sys
 
-from cloudscraper import create_scraper
-
 from src.cian_pages import get_cian_place, get_cian_links
-from src.parsing import parse_place
-from src.place import CianPlace
 from src.geo import get_point, get_route
 from src.to_table import to_table_row
 
-urls_global = [
-  'https://www.cian.ru/rent/flat/283105175/',
-  'https://www.cian.ru/rent/flat/283907495/',
-  'https://www.cian.ru/rent/flat/240400774/',
-  'https://www.cian.ru/rent/flat/280696517/',
-  'https://www.cian.ru/rent/flat/283635661/',
-  'https://www.cian.ru/rent/flat/283499711/',
-  'https://www.cian.ru/rent/flat/279331094/',
-  'https://www.cian.ru/rent/flat/283723910/',
-  'https://www.cian.ru/rent/flat/279767038/',
-  'https://www.cian.ru/rent/flat/283324821/',
-  'https://www.cian.ru/rent/flat/284167193/',
-  'https://www.cian.ru/rent/flat/284224599/',
-  'https://www.cian.ru/rent/flat/283531186/',
-  'https://www.cian.ru/rent/flat/281472489/',
-  'https://www.cian.ru/rent/flat/280638784/',
-  'https://www.cian.ru/rent/flat/282153921/',
-]
 
-urls_global2 = [
-  'https://www.cian.ru/rent/flat/284433144/',
-  'https://www.cian.ru/rent/flat/283629140/',
-  'https://www.cian.ru/rent/flat/284375779/',
-  'https://www.cian.ru/rent/flat/272766324/',
-  'https://www.cian.ru/rent/flat/284082701/',
-  'https://www.cian.ru/rent/flat/266606647/',
-  'https://www.cian.ru/rent/flat/280753983/',
-  'https://www.cian.ru/rent/flat/279427093/',
-  'https://www.cian.ru/rent/flat/283622552/',
-  'https://www.cian.ru/rent/flat/284207614/',
-  'https://www.cian.ru/rent/flat/282452518/',
-  'https://www.cian.ru/rent/flat/248164188/',
-  'https://www.cian.ru/rent/flat/283813056/',
-  'https://www.cian.ru/rent/flat/196343481/',
-  'https://www.cian.ru/rent/flat/284420738/',
-  'https://www.cian.ru/rent/flat/282092792/',
-  'https://www.cian.ru/rent/flat/278802162/',
-  'https://www.cian.ru/rent/flat/283855871/',
-  'https://www.cian.ru/rent/flat/279705148/',
-  'https://www.cian.ru/rent/flat/279799496/',
-  'https://www.cian.ru/rent/flat/281809683/',
-  'https://www.cian.ru/rent/flat/282047026/',
-  'https://www.cian.ru/rent/flat/284234424/',
-  'https://www.cian.ru/rent/flat/284236441/',
-  'https://www.cian.ru/rent/flat/284188129/',
-  'https://www.cian.ru/rent/flat/284196586/',
-  'https://www.cian.ru/rent/flat/281354449/',
-  'https://www.cian.ru/rent/flat/283966491/',
-]
-
-addrs_global = [
-  ('Плотников переулок 10', 'Новинский бул., 8, Москва'),
-  ('Плотников переулок 10', 'ул. Льва Толстого, 16, Москва'),
-  ('Плотников переулок 10', 'Староконюшенный переулок, 5/14'),
-  ('1-я улица Машиностроения, 4к2', 'Староконюшенный переулок, 5/14'),
-]
+def make_argparser():
+  parser = argparse.ArgumentParser(prog='rentparser',
+                                   description='Парсер циана')
+  subparsers = parser.add_subparsers(title='Команды')
+  
+  point = subparsers.add_parser('point')
+  point.add_argument('address',
+                     type=str,
+                     help='Адрес в человековаримом формате')
+  point.set_defaults(func=point_command)
+  
+  route = subparsers.add_parser('route')
+  route.add_argument('addr_from',
+                     type=str,
+                     help='Адрес отправления (в человековаримом формате)')
+  route.add_argument('addr_to',
+                     type=str,
+                     help='Адрес назначения')
+  route.set_defaults(func=route_command)
+  
+  links = subparsers.add_parser('links')
+  links.add_argument('url',
+                     type=str,
+                     help='Страница, откуда следует извлечь ссылки на объявления Циана')
+  links.set_defaults(func=links_command)
+  
+  parse = subparsers.add_parser('parse')
+  parse.add_argument('urls',
+                     nargs='+',
+                     type=str,
+                     help='Страницы с предложениями Циана')
+  parse.add_argument('--addrs',
+                     nargs='+',
+                     type=str,
+                     default=[],
+                     help='Адреса, время и расстояние до которых нужно посчитать')
+  parse.set_defaults(func=parse_command)
+  return parser
 
 
-
-def point_test():
-  a = addrs_global[0][0]
-  b = addrs_global[0][1]
-  for addr in [a, a, b]:
-    print(addr, '->', get_point(addr))
-    
-    
-def get_cian_links_test():
-  url = 'https://www.cian.ru/cat.php?currency=2&deal_type=rent&engine_version=2&foot_min=45&maxprice=80000&metro%5B0%5D=56&metro%5B1%5D=86&metro%5B2%5D=115&offer_type=flat&only_foot=2&room1=1&type=4'
-  links = get_cian_links(url)
-  print(*links, sep='\n')
-
-
-def cian_urls_test():
-  addrs = [
-    # 'Плотников переулок 10',
-    # 'Староконюшенный переулок, 5/14',
-    # 'Новинский бул., 8, Москва',
-    # 'ул. Льва Толстого, 16, Москва',
-  ]
-  for url in urls_global2:
-    place = get_cian_place(url)
-    print(to_table_row(place, addrs=addrs, url=url))
-
-
-def geo_test():
-  for addr_from, addr_to in addrs_global:
-    print(addr_from, '->', addr_to)
-    route = get_route(addr_from, addr_to)
-    print(route.minutes, 'минут', route.metres, 'метров')
-    print()
-
-
-def print_cian(cian: CianPlace):
-  print(cian.__dict__)
-
-
-def cian_test():
-  if len(sys.argv) >= 2:
-    scraper = create_scraper()
-    scraper.headers = {'Accept-Language': 'ru'}
-    html = scraper.get(url=sys.argv[1]).text
-    if len(sys.argv) >= 3:
-      with open('out3.html', 'w') as file:
-        file.write(html)
-    place = parse_place(html)
+def point_command(args):
+  point = get_point(args.address)
+  if point is None:
+    print(f'Не удалось получить координаты :( попробуйте уточнить адрес')
   else:
-    place = parse_place(open('out2.html').read())
-  print(place)
-  lon, lat = get_point(' '.join(place.addr))
-  print(lon, lat)
+    print('%.6f %.6f' % (point.lat, point.lon))
+
+
+def route_command(args):
+  route = get_route(args.addr_from, args.addr_to)
+  if route is None:
+    print('Не удалось получить маршрут :( попробуйте уточнить адрес')
+  else:
+    print(route.prettify())
+    
+    
+def links_command(args):
+  links = get_cian_links(args.url)
+  if links is None:
+    print('Что-то пошло не так :(')
+  else:
+    print(*links, sep='\n')
+    
+    
+def parse_command(args):
+  for url in args.urls:
+    place = get_cian_place(url)
+    if place is None:
+      print(f'Со ссылкой {url} что-то пошло не так :(', file=sys.stderr)
+    else:
+      print(to_table_row(place, addrs=args.addrs, url=url))
 
 
 def main():
-  cian_urls_test()
+  parser = make_argparser()
+  args = parser.parse_args()
+  if args.__dict__.get('func') is None:
+    parser.print_usage()
+    return
+  args.func(args)
 
 
 if __name__ == '__main__':

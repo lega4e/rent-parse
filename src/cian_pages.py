@@ -14,12 +14,15 @@ _dir = 'cian_pages'
 
 
 def get_cian_links(url: str) -> [str]:
-  tags = BeautifulSoup(_create_scraper().get(url).text, 'lxml').find_all(
-    lambda t:
-      t.has_attr('href') and
-      re.match(r'https://www.cian.ru/rent/flat/\d+/$', t['href'])
-  )
-  return [t['href'] for t in tags]
+  try:
+    tags = BeautifulSoup(_create_scraper().get(url).text, 'lxml').find_all(
+      lambda t:
+        t.has_attr('href') and
+        re.match(r'https://www.cian.ru/rent/flat/\d+/$', t['href'])
+    )
+    return [t['href'] for t in tags]
+  except:
+    return None
 
 
 def get_cian_place(url: str) -> CianPlace:
@@ -32,18 +35,11 @@ def get_cian_place(url: str) -> CianPlace:
   if _is_invalid(place):
     time.sleep(5)
     return get_cian_place(url)
-  _mkdir()
+  os.makedirs(_dir, exist_ok=True)
   open(_filename(url), 'w').write(html)
   return place
 
 
-def _mkdir():
-  try:
-    os.mkdir(_dir)
-  except:
-    pass
-  
-  
 def _is_invalid(place: CianPlace) -> bool:
   return len(place.addr) == 0 or place.rooms is None
 

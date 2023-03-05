@@ -48,7 +48,7 @@ def get_point(addr: str) -> Optional[GeoPoint]:
   :param addr: Адрес записаный по-человечески
   :return: Координаты (если не получается, то None)
   """
-  addr = addr[:addr.rfind('/')]
+  addr = addr.replace('/', ' ')
   if lira().get(addr) is not None:
     return lira().get(addr) or None
   data = json.loads(requests.get(_make_geocoder_url(addr)).text)
@@ -59,7 +59,7 @@ def get_point(addr: str) -> Optional[GeoPoint]:
     return None
   pos = members[0]['GeoObject']['Point']['pos']
   m = re.match(r'(\d+\.\d+)\D+(\d+\.\d+)', pos)
-  geo = GeoPoint(lat=m.group(2), lon=m.group(1))
+  geo = GeoPoint(lat=float(m.group(2)), lon=float(m.group(1)))
   lira().put(geo, id=addr)
   lira().flush()
   return geo

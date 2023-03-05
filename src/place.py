@@ -41,10 +41,12 @@ class Price:
       rent: int = None,
       commission: int = None,
       deposit: int = None,
+      jkh_include: bool = None,
   ):
     self.rent = rent
     self.commission = commission
     self.deposit = deposit
+    self.jkh_include = jkh_include
 
   def __str__(self):
     return (f'<Price rent: {self.rent}, '

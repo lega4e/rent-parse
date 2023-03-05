@@ -42,8 +42,7 @@ def get_price(soup: BeautifulSoup) -> Price:
   tags = data_tags(soup, 'OfferFactItem')
   items = {}
   for tag in tags:
-    items[tag.p.text] = orn(
-      lambda: tag.p.next_sibling.next_sibling.text)
+    items[tag.p.text] = orn(lambda: tag.p.next_sibling.next_sibling.text)
   items['Цена'] = orn(
     lambda: data_tags(soup, 'PriceInfo')[0].div.span.text)
   price = Price()
@@ -55,6 +54,8 @@ def get_price(soup: BeautifulSoup) -> Price:
     price.commission = 0
   else:
     price.commission = orn(tr.integer, items.get('Комиссия'))
+  if items.get('Оплата ЖКХ') == 'включена (без счётчиков)':
+    price.jkh_include = True
   return price
 
 
@@ -63,9 +64,12 @@ def get_addr(soup: BeautifulSoup) -> [str]:
 
 
 def get_under(soup: BeautifulSoup) -> [str]:
-  return [Underground(name=tag.a.text, minutes=orn(tr.integer, tag.span.text))
-      for tag
-      in data_tags(soup, 'UndergroundItem')]
+  return [
+    orn(lambda:
+          Underground(name=tag.a.text,
+          minutes=orn(lambda: tr.integer(tag.span.text))))
+    for tag
+    in data_tags(soup, 'UndergroundItem')]
 
 
 def get_params(soup: BeautifulSoup) -> [str]:
@@ -78,6 +82,7 @@ def get_params(soup: BeautifulSoup) -> [str]:
     'Вид из окон',
     'Можно с детьми',
     'Можно с животными',
+    'Планировка',
   ]
   div = data_tags(soup, 'OfferSummaryInfoGroup')[0]
   res = {}
