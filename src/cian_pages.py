@@ -13,15 +13,29 @@ from src.utils import orn
 _dir = 'cian_pages'
 
 
-def get_cian_links(url: str) -> [str]:
+def get_cian_links(url: str, pages_num: int) -> [str]:
   try:
-    tags = BeautifulSoup(_create_scraper().get(url).text, 'lxml').find_all(
-      lambda t:
-        t.has_attr('href') and
-        re.match(r'https://www.cian.ru/rent/flat/\d+/$', t['href'])
-    )
+    tags = []
+    page_num = 1
+    while True and page_num <= pages_num:
+      page = BeautifulSoup(_create_scraper().get(url).text, 'lxml')
+      tags += page.find_all(
+        lambda t:
+          t.has_attr('href') and
+          re.match(r'https://www.cian.ru/rent/flat/\d+/$', t['href'])
+      )
+      next_page = page.find(
+        lambda t:
+          t.has_attr('href') and
+          re.match(r'https://www\.cian\.ru/cat\.php\?.*?&p=(\d+)&.*', t['href'])
+      )
+      if next_page is None:
+        break
+      url = next_page['href']
+      page_num += 1
     return [t['href'] for t in tags]
-  except:
+  except Exception as e:
+    print(f'Error: {e}')
     return None
 
 
