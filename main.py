@@ -31,6 +31,10 @@ def make_argparser():
   links.add_argument('url',
                      type=str,
                      help='Страница, откуда следует извлечь ссылки на объявления Циана')
+  links.add_argument('pages_num',
+                     type=int,
+                     default=1,
+                     help='Количество страниц, которые будем парсить со страницы, откуда следует извлечь ссылки на объявления Циана')
   links.set_defaults(func=links_command)
   
   parse = subparsers.add_parser('parse')
@@ -64,7 +68,7 @@ def route_command(args):
     
     
 def links_command(args):
-  links = get_cian_links(args.url)
+  links = get_cian_links(args.url, args.pages_num)
   if links is None:
     print('Что-то пошло не так :(')
   else:
